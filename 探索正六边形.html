@@ -55,12 +55,30 @@
 
   .brand svg { flex: none; }
 
+  .school-logo {
+    width: 68px;
+    height: 70px;
+    flex: none;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(90, 55, 15, 0.12);
+  }
+
   h1 {
     margin: 0;
     font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
     font-size: 30px;
     font-weight: 700;
     letter-spacing: 0.04em;
+  }
+
+  .classroom {
+    margin: 0 0 2px;
+    color: #8a4b08;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
   }
 
   header p {
@@ -277,11 +295,9 @@
   <div class="app">
     <header>
       <div class="brand">
-        <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
-          <polygon points="21,3 37,12 37,30 21,39 5,30 5,12" fill="#f6c453" stroke="#8a4b08" stroke-width="2.2" stroke-linejoin="round"/>
-          <polygon points="21,11 29,15.5 29,25.5 21,30 13,25.5 13,15.5" fill="none" stroke="#fffaf3" stroke-width="1.6"/>
-        </svg>
+        <img class="school-logo" src="keystone-logo.svg" alt="北京市鼎石学校" width="68" height="70" />
         <div>
+          <p class="classroom">刘老师数学课堂</p>
           <h1>探索正六边形</h1>
           <p>看内角、找对称轴，再把正六边形复制拼成密铺图案。</p>
         </div>
