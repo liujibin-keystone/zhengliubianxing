@@ -37,29 +37,39 @@
   .app {
     height: 100vh;
     display: grid;
-    grid-template-columns: 332px 1fr;
+    grid-template-columns: 360px 1fr;
     grid-template-rows: auto 1fr;
     overflow: hidden;
   }
 
   header {
     grid-column: 1 / -1;
-    padding: 18px 28px 6px;
-  }
-
-  .brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 12px 24px 8px;
   }
 
-  .brand svg { flex: none; }
-
+  .teacher-logo,
   .school-logo {
-    width: 72px;
-    height: 74px;
     flex: none;
     object-fit: contain;
+  }
+
+  .teacher-logo {
+    width: 108px;
+    height: 108px;
+  }
+
+  .school-logo {
+    width: 84px;
+    height: 86px;
+  }
+
+  .brand-title {
+    flex: 1;
+    text-align: center;
   }
 
   h1 {
@@ -70,12 +80,12 @@
     letter-spacing: 0.04em;
   }
 
-  .classroom {
-    margin: 0 0 2px;
+  .en-title {
+    margin: 2px 0 0;
     color: #8a4b08;
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.06em;
   }
 
   header p {
@@ -100,8 +110,17 @@
     margin: 0 0 8px;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.08em;
     color: #a16207;
+  }
+
+  .step small {
+    display: block;
+    margin-top: 1px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #8a7564;
   }
 
   .tools { display: grid; gap: 8px; }
@@ -122,6 +141,22 @@
   }
 
   button svg { flex: none; }
+
+  button .bi {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+  }
+
+  button .en {
+    font-size: 11px;
+    font-weight: 500;
+    color: #8a7564;
+  }
+
+  button.active .en,
+  button.on .en { color: inherit; opacity: 0.82; }
 
   button:hover { border-color: #e2c48a; background: #fffdf8; }
 
@@ -167,13 +202,19 @@
   }
 
   .tag {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
     padding: 3px 8px;
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 12px;
     background: #fff;
     color: var(--muted);
     font-size: 12px;
+    line-height: 1.2;
   }
+
+  .tag .en { font-size: 10px; }
 
   .tag.got {
     background: var(--good-bg);
@@ -190,6 +231,7 @@
     color: #3f2d1c;
     font-size: 14px;
     line-height: 1.65;
+    white-space: pre-line;
   }
 
   .fact b { font-weight: 700; }
@@ -291,77 +333,76 @@
 <body>
   <div class="app">
     <header>
-      <div class="brand">
-        <img class="school-logo" src="keystone-logo.svg" alt="北京市鼎石学校" width="72" height="74" />
-        <div>
-          <p class="classroom">刘老师数学课堂</p>
-          <h1>探索正六边形</h1>
-          <p>看内角、找对称轴，再把正六边形复制拼成密铺图案。</p>
-        </div>
+      <img class="teacher-logo" src="teacher-logo.png" alt="刘老师数学课堂 Teacher Liu" width="108" height="108" />
+      <div class="brand-title">
+        <h1>探索正六边形</h1>
+        <p class="en-title">Explore Regular Hexagons</p>
+        <p>看内角、找对称轴，再拼成密铺。<br>See the angles, find the symmetries, then tile the plane.</p>
       </div>
+      <img class="school-logo" src="keystone-logo.svg" alt="北京市鼎石学校 Keystone Academy" width="84" height="86" />
     </header>
 
     <aside>
       <section>
-        <div class="step">1 · 内角</div>
+        <div class="step">1 · 内角<small>Interior angles</small></div>
         <div class="tools">
           <button id="btnAngle" type="button" aria-pressed="false">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path d="M5 18 L12 6 L19 18" stroke-linejoin="round"/>
               <path d="M8.2 14.5 A6 6 0 0 1 15.8 14.5"/>
             </svg>
-            <span>显示内角</span>
+            <span class="bi"><span class="zh">显示内角</span><span class="en">Show angles</span></span>
           </button>
         </div>
-        <p class="hint">点击六边形，六个内角会标成 120°。再点一次可以隐藏。</p>
+        <p class="hint">点击六边形，六个内角会标成 120°。再点一次可以隐藏。<br>Click the hexagon to label each 120° angle. Click again to hide.</p>
       </section>
 
       <section>
-        <div class="step">2 · 对称轴</div>
+        <div class="step">2 · 对称轴<small>Lines of symmetry</small></div>
         <div class="tools">
           <button id="btnAxis" type="button" aria-pressed="false">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <polygon points="12,3 20,7.5 20,16.5 12,21 4,16.5 4,7.5" stroke-linejoin="round"/>
               <path d="M12 2.5 V21.5 M4 12 H20" stroke-dasharray="2.2 2"/>
             </svg>
-            <span>显示对称轴</span>
+            <span class="bi"><span class="zh">显示对称轴</span><span class="en">Show axes</span></span>
           </button>
           <button id="btnDraw" type="button">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path d="M4 20 L9 18.5 L19 8.5 L16.2 5.7 L6.2 15.7 Z" stroke-linejoin="round"/>
               <path d="M14.8 7.2 L17.6 10"/>
             </svg>
-            <span>画对称轴</span>
+            <span class="bi"><span class="zh">画对称轴</span><span class="en">Draw an axis</span></span>
           </button>
         </div>
         <div class="legend">
-          <span><i class="dot"></i>顶点</span>
-          <span><i class="ring"></i>边的中点</span>
+          <span><i class="dot"></i>顶点 Vertices</span>
+          <span><i class="ring"></i>边的中点 Midpoints</span>
         </div>
         <div class="tags" id="axisTags"></div>
-        <p class="hint">点「显示对称轴」看全部 6 条。选「画对称轴」后，从哪里起笔都可以。松开后，你画过的痕迹会原样留下，不会被收成标准答案。连对了，笔迹下面会透出绿色。</p>
+        <p class="hint">点「显示对称轴」看全部 6 条。画的时候笔迹会留下，连对了会透出绿色。<br>Show all 6 axes, or draw your own. A correct line glows green, and your stroke stays.</p>
       </section>
 
       <section>
-        <div class="step">3 · 复制与密铺</div>
+        <div class="step">3 · 复制与密铺<small>Copy and tessellate</small></div>
         <div class="tools">
           <button id="btnCopy" type="button">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <polygon points="9,4 15,7.2 15,14 9,17.2 3,14 3,7.2" stroke-linejoin="round"/>
               <polygon points="15,7 21,10.2 21,17 15,20.2 11,18" stroke-linejoin="round"/>
             </svg>
-            <span>复制拼图</span>
+            <span class="bi"><span class="zh">复制拼图</span><span class="en">Copy and tile</span></span>
           </button>
           <div class="row-2">
-            <button id="btnAdd" type="button">复制一个</button>
-            <button id="btnGrow" type="button">密铺一层</button>
+            <button id="btnAdd" type="button"><span class="bi"><span class="zh">复制一个</span><span class="en">Copy one</span></span></button>
+            <button id="btnGrow" type="button"><span class="bi"><span class="zh">密铺一层</span><span class="en">Add a ring</span></span></button>
           </div>
           <div class="row-2">
-            <button id="btnRemove" type="button" disabled>移除选中</button>
-            <button id="btnClearCopies" type="button" class="ghost">清空副本</button>
+            <button id="btnRemove" type="button" disabled><span class="bi"><span class="zh">移除选中</span><span class="en">Remove</span></span></button>
+            <button id="btnClearCopies" type="button" class="ghost"><span class="bi"><span class="zh">清空副本</span><span class="en">Clear copies</span></span></button>
           </div>
         </div>
-        <p class="hint">进入复制拼图后，点击虚线格放下副本，拖动副本可以改位置。三个 120° 围成 360°，就能铺满平面。滚轮缩放，拖动空白处移动画面。</p>
+        <p class="hint">点击虚线格放下副本，拖动可改位置。三个 120° 围成 360°，就能铺满。<br>Click a dashed cell to place a copy. Three 120° angles make 360°, so the tiles fill the plane.</p>
       </section>
 
       <div class="fact" id="fact"></div>
@@ -369,19 +410,19 @@
       <section>
         <div class="tools" style="margin-top: 12px;">
           <div class="row-2">
-            <button id="btnClearLines" type="button" class="ghost">清除画线</button>
-            <button id="btnReset" type="button" class="ghost">清空重来</button>
+            <button id="btnClearLines" type="button" class="ghost"><span class="bi"><span class="zh">清除画线</span><span class="en">Clear lines</span></span></button>
+            <button id="btnReset" type="button" class="ghost"><span class="bi"><span class="zh">清空重来</span><span class="en">Start over</span></span></button>
           </div>
         </div>
       </section>
     </aside>
 
     <main>
-      <canvas id="board" aria-label="正六边形画板"></canvas>
+      <canvas id="board" aria-label="正六边形画板 Regular hexagon board"></canvas>
       <div class="hud">
         <div id="meta"></div>
         <div id="status" aria-live="polite"></div>
-        <button id="btnReframe" type="button">重置视图</button>
+        <button id="btnReframe" type="button"><span class="bi"><span class="zh">重置视图</span><span class="en">Reset view</span></span></button>
       </div>
     </main>
   </div>
@@ -391,7 +432,14 @@
 
 const DIRS = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
-const TAGS = ["顶点 A–D", "顶点 B–E", "顶点 C–F", "中点 AB", "中点 BC", "中点 CD"];
+const TAGS = [
+  ["顶点 A–D", "Vertices A–D"],
+  ["顶点 B–E", "Vertices B–E"],
+  ["顶点 C–F", "Vertices C–F"],
+  ["中点 AB", "Midpoint AB"],
+  ["中点 BC", "Midpoint BC"],
+  ["中点 CD", "Midpoint CD"]
+];
 const MAX_DIST = 4;
 const MAX_CELLS = 61;
 const FONT = '"PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif';
@@ -756,26 +804,31 @@ function stepAnim() {
 function factText() {
   const found = foundSet().size;
   if (found === 6) {
-    return "6 条对称轴都找到了。3 条连接相对顶点，3 条穿过对边中点。沿着任意一条对折，两边都会重合。";
+    return "6 条对称轴都找到了。3 条连接相对顶点，3 条穿过对边中点。\nAll 6 lines of symmetry are found: 3 through opposite vertices, 3 through the midpoints of opposite sides.";
   }
-  if (mode === "draw" && feedback) return feedback + (found ? " 已找到 " + found + " / 6 条。" : "");
+  if (mode === "draw" && feedback) return feedback + (found ? "\n已找到 Found " + found + " / 6." : "");
   if (cells.size > 1) {
-    return "正六边形可以密铺。每个内角 120°，三个角拼在同一个顶点上是 120° × 3 = 360°，正好铺满，没有缝隙。正多边形里，能单独密铺的还有正三角形和正方形。";
+    return "正六边形可以密铺。120° × 3 = 360°，三个角正好铺满一个顶点。\nRegular hexagons tessellate: three 120° angles fill 360° around a point.";
   }
   if (showAxes || mode === "draw" || found > 0) {
-    return "正六边形有 6 条对称轴：3 条连接相对顶点（A–D、B–E、C–F），3 条穿过相对边的中点。沿着对称轴对折，两边完全重合。";
+    return "正六边形有 6 条对称轴：3 条连接相对顶点，3 条穿过对边中点。\nA regular hexagon has 6 lines of symmetry.";
   }
   if (showAngles) {
-    return "内角 = (6 − 2) × 180° ÷ 6 = 120°。六个内角相等，内角和是 720°。边上的短线表示边长相等。";
+    return "内角 = (6 − 2) × 180° ÷ 6 = 120°。内角和是 720°。\nEach interior angle is 120°. The sum is 720°.";
   }
-  return "这是一个正六边形：六条边相等，六个角相等。先点击它，看看每个内角是多少度。";
+  return "这是一个正六边形：六条边相等，六个角相等。\nThis is a regular hexagon: six equal sides and six equal angles.";
+}
+
+function setButtonLabel(button, zh, en) {
+  const zhNode = button.querySelector(".zh");
+  const enNode = button.querySelector(".en");
+  if (zhNode) zhNode.textContent = zh;
+  if (enNode) enNode.textContent = en;
 }
 
 function syncUI() {
-  const angleSpan = els.angle.querySelector("span");
-  const axisSpan = els.axis.querySelector("span");
-  angleSpan.textContent = showAngles ? "隐藏内角" : "显示内角";
-  axisSpan.textContent = showAxes ? "隐藏对称轴" : "显示对称轴";
+  setButtonLabel(els.angle, showAngles ? "隐藏内角" : "显示内角", showAngles ? "Hide angles" : "Show angles");
+  setButtonLabel(els.axis, showAxes ? "隐藏对称轴" : "显示对称轴", showAxes ? "Hide axes" : "Show axes");
   els.angle.classList.toggle("on", showAngles);
   els.axis.classList.toggle("on", showAxes);
   els.angle.setAttribute("aria-pressed", String(showAngles));
@@ -788,14 +841,19 @@ function syncUI() {
   for (let i = 0; i < TAGS.length; i++) {
     const tag = document.createElement("span");
     tag.className = "tag" + (found.has(i) ? " got" : "");
-    tag.textContent = TAGS[i];
+    const zh = document.createElement("span");
+    zh.textContent = TAGS[i][0];
+    const en = document.createElement("span");
+    en.className = "en";
+    en.textContent = TAGS[i][1];
+    tag.append(zh, en);
     els.tags.appendChild(tag);
   }
   els.fact.textContent = factText();
   els.fact.classList.toggle("good", found.size === 6);
   els.status.textContent = statusText;
-  const noun = cells.size === 1 ? "1 个正六边形" : cells.size + " 个正六边形";
-  els.meta.textContent = noun + " · 对称轴 " + found.size + "/6";
+  const noun = cells.size === 1 ? "1 个 · 1 hexagon" : cells.size + " 个 · " + cells.size + " hexagons";
+  els.meta.textContent = noun + " · 对称轴 Axes " + found.size + "/6";
 }
 
 function traceHexAt(cx, cy, radius) {
