@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>探索正六边形</title>
+<style>
+  :root {
+    --bg: #f3ecdf;
+    --ink: #241c14;
+    --muted: #6d6156;
+    --card: #fffaf3;
+    --line: #eadfce;
+    --honey: #f0b429;
+    --honey-deep: #8a4b08;
+    --good: #0f7a4e;
+    --good-bg: #e7f6ef;
+    --axis: #2563eb;
+    --danger: #c2410c;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 12% -10%, #fff8ea 0%, transparent 46%),
+      radial-gradient(ellipse at 100% 0%, #fde7c2 0%, transparent 32%),
+      var(--bg);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  }
+
+  button, input { font-family: inherit; }
+
+  .app {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 332px 1fr;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+  }
+
+  header {
+    grid-column: 1 / -1;
+    padding: 18px 28px 6px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand svg { flex: none; }
+
+  h1 {
+    margin: 0;
+    font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  header p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  aside {
+    margin: 10px 0 16px 16px;
+    padding: 14px;
+    background: rgba(255, 250, 243, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(90, 55, 15, 0.06);
+    overflow: auto;
+  }
+
+  section + section { margin-top: 14px; }
+
+  .step {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #a16207;
+  }
+
+  .tools { display: grid; gap: 8px; }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  button svg { flex: none; }
+
+  button:hover { border-color: #e2c48a; background: #fffdf8; }
+
+  button:focus-visible {
+    outline: 2px solid #e0a53a;
+    outline-offset: 2px;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  button.on {
+    background: #fff6e0;
+    border-color: #e8b14a;
+    color: #7c4a03;
+    font-weight: 600;
+  }
+
+  button.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
+  button.ghost {
+    background: transparent;
+  }
+
+  .hint {
+    margin: 8px 2px 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .tag {
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .tag.got {
+    background: var(--good-bg);
+    border-color: #8dceb0;
+    color: var(--good);
+    font-weight: 650;
+  }
+
+  .fact {
+    margin-top: 14px;
+    padding: 12px 12px 11px;
+    border-radius: 14px;
+    background: #fff6e4;
+    color: #3f2d1c;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .fact b { font-weight: 700; }
+
+  .fact.good {
+    background: var(--good-bg);
+    color: #145c3c;
+  }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .legend span { display: flex; align-items: center; gap: 6px; }
+
+  .dot, .ring {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot { background: #8a4b08; }
+
+  .ring {
+    background: #fff;
+    border: 2px solid #8a4b08;
+  }
+
+  main {
+    position: relative;
+    margin: 10px 16px 16px 12px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fffaf3;
+    box-shadow: 0 12px 36px rgba(90, 55, 15, 0.08);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .hud {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255, 250, 243, 0.9);
+    color: var(--muted);
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  #status {
+    flex: 1;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+
+  .hud button {
+    width: auto;
+    padding: 6px 10px;
+    pointer-events: auto;
+    font-size: 13px;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto minmax(420px, 1fr);
+      height: auto;
+      min-height: 100vh;
+      overflow: auto;
+    }
+
+    aside { margin: 8px 16px 0; max-height: none; }
+    main { height: 70vh; margin: 12px 16px 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
+          <polygon points="21,3 37,12 37,30 21,39 5,30 5,12" fill="#f6c453" stroke="#8a4b08" stroke-width="2.2" stroke-linejoin="round"/>
+          <polygon points="21,11 29,15.5 29,25.5 21,30 13,25.5 13,15.5" fill="none" stroke="#fffaf3" stroke-width="1.6"/>
+        </svg>
+        <div>
+          <h1>探索正六边形</h1>
+          <p>看内角、找对称轴，再把正六边形复制拼成密铺图案。</p>
+        </div>
+      </div>
+    </header>
+
+    <aside>
+      <section>
+        <div class="step">1 · 内角</div>
+        <div class="tools">
+          <button id="btnAngle" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M5 18 L12 6 L19 18" stroke-linejoin="round"/>
+              <path d="M8.2 14.5 A6 6 0 0 1 15.8 14.5"/>
+            </svg>
+            <span>显示内角</span>
+          </button>
+        </div>
+        <p class="hint">点击六边形，六个内角会标成 120°。再点一次可以隐藏。</p>
+      </section>
+
+      <section>
+        <div class="step">2 · 对称轴</div>
+        <div class="tools">
+          <button id="btnAxis" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <polygon points="12,3 20,7.5 20,16.5 12,21 4,16.5 4,7.5" stroke-linejoin="round"/>
+              <path d="M12 2.5 V21.5 M4 12 H20" stroke-dasharray="2.2 2"/>
+            </svg>
+            <span>显示对称轴</span>
+          </button>
+          <button id="btnDraw" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M4 20 L9 18.5 L19 8.5 L16.2 5.7 L6.2 15.7 Z" stroke-linejoin="round"/>
+              <path d="M14.8 7.2 L17.6 10"/>
+            </svg>
+            <span>画对称轴</span>
+          </button>
+        </div>
+        <div class="legend">
+          <span><i class="dot"></i>顶点</span>
+          <span><i class="ring"></i>边的中点</span>
+        </div>
+        <div class="tags" id="axisTags"></div>
+        <p class="hint">点「显示对称轴」看全部 6 条。选「画对称轴」后，从哪里起笔都可以。松开后，你画过的痕迹会原样留下，不会被收成标准答案。连对了，笔迹下面会透出绿色。</p>
+      </section>
+
+      <section>
+        <div class="step">3 · 复制与密铺</div>
+        <div class="tools">
+          <button id="btnCopy" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <polygon points="9,4 15,7.2 15,14 9,17.2 3,14 3,7.2" stroke-linejoin="round"/>
+              <polygon points="15,7 21,10.2 21,17 15,20.2 11,18" stroke-linejoin="round"/>
+            </svg>
+            <span>复制拼图</span>
+          </button>
+          <div class="row-2">
+            <button id="btnAdd" type="button">复制一个</button>
+            <button id="btnGrow" type="button">密铺一层</button>
+          </div>
+          <div class="row-2">
+            <button id="btnRemove" type="button" disabled>移除选中</button>
+            <button id="btnClearCopies" type="button" class="ghost">清空副本</button>
+          </div>
+        </div>
+        <p class="hint">进入复制拼图后，点击虚线格放下副本，拖动副本可以改位置。三个 120° 围成 360°，就能铺满平面。滚轮缩放，拖动空白处移动画面。</p>
+      </section>
+
+      <div class="fact" id="fact"></div>
+
+      <section>
+        <div class="tools" style="margin-top: 12px;">
+          <div class="row-2">
+            <button id="btnClearLines" type="button" class="ghost">清除画线</button>
+            <button id="btnReset" type="button" class="ghost">清空重来</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <main>
+      <canvas id="board" aria-label="正六边形画板"></canvas>
+      <div class="hud">
+        <div id="meta"></div>
+        <div id="status" aria-live="polite"></div>
+        <button id="btnReframe" type="button">重置视图</button>
+      </div>
+    </main>
+  </div>
+
+<script>
+"use strict";
+
+const DIRS = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+const LETTERS = ["A", "B", "C", "D", "E", "F"];
+const TAGS = ["顶点 A–D", "顶点 B–E", "顶点 C–F", "中点 AB", "中点 BC", "中点 CD"];
+const MAX_DIST = 4;
+const MAX_CELLS = 61;
+const FONT = '"PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif';
+
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
+
+const els = {
+  angle: document.getElementById("btnAngle"),
+  axis: document.getElementById("btnAxis"),
+  draw: document.getElementById("btnDraw"),
+  copy: document.getElementById("btnCopy"),
+  add: document.getElementById("btnAdd"),
+  grow: document.getElementById("btnGrow"),
+  remove: document.getElementById("btnRemove"),
+  clearCopies: document.getElementById("btnClearCopies"),
+  clearLines: document.getElementById("btnClearLines"),
+  reset: document.getElementById("btnReset"),
+  reframe: document.getElementById("btnReframe"),
+  fact: document.getElementById("fact"),
+  status: document.getElementById("status"),
+  meta: document.getElementById("meta"),
+  tags: document.getElementById("axisTags")
+};
+
+const cells = new Map();
+let strokes = [];
+let mode = "explore";
+let showAngles = false;
+let showAxes = false;
+let selected = null;
+let statusText = "点击中间的六边形，查看每个内角的度数。";
+let feedback = "";
+let R = 96;
+let ox = 0;
+let oy = 0;
+let oxRatio = 0.5;
+let oyRatio = 0.5;
+let viewW = 1;
+let viewH = 1;
+let hover = null;
+let gesture = null;
+let anchor = null;
+let viewAnim = 0;
+const anim = { angle: 0, angleTo: 0, axis: 0, axisTo: 0 };
+let animating = false;
+
+cells.set("0,0", { q: 0, r: 0 });
+
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+function keyOf(q, r) { return q + "," + r; }
+
+function axialDist(q, r) {
+  return (Math.abs(q) + Math.abs(r) + Math.abs(-q - r)) / 2;
+}
+
+function normHalf(a) {
+  let x = a % Math.PI;
+  if (x < 0) x += Math.PI;
+  if (x > Math.PI - 1e-8) x = 0;
+  return x;
+}
+
+function anglePeriodDist(a, b) {
+  let d = Math.abs(a - b) % Math.PI;
+  if (d > Math.PI / 2) d = Math.PI - d;
+  return d;
+}
+
+const AXES = [];
+for (let i = 0; i < 3; i++) {
+  AXES.push({ angle: normHalf(-Math.PI / 2 + i * Math.PI / 3), type: "vertex" });
+}
+for (let i = 0; i < 3; i++) {
+  AXES.push({ angle: normHalf(-Math.PI / 2 + Math.PI / 6 + i * Math.PI / 3), type: "mid" });
+}
+
+function vertexLocal(i) {
+  const a = -Math.PI / 2 + i * Math.PI / 3;
+  return { x: Math.cos(a), y: Math.sin(a) };
+}
+
+function midLocal(i) {
+  const a = vertexLocal(i);
+  const b = vertexLocal((i + 1) % 6);
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+function cellWorld(q, r) {
+  return {
+    x: Math.sqrt(3) * (q + r / 2),
+    y: 1.5 * r
+  };
+}
+
+function centerScreen(q, r) {
+  const w = cellWorld(q, r);
+  return { x: ox + w.x * R, y: oy + w.y * R };
+}
+
+function localToScreen(q, r, x, y) {
+  const c = centerScreen(q, r);
+  return { x: c.x + x * R, y: c.y + y * R };
+}
+
+function screenToLocal(sx, sy, q, r) {
+  const c = centerScreen(q, r);
+  return { x: (sx - c.x) / R, y: (sy - c.y) / R };
+}
+
+function axialRound(q, r) {
+  const x = q;
+  const z = r;
+  const y = -x - z;
+  let rx = Math.round(x);
+  let ry = Math.round(y);
+  let rz = Math.round(z);
+  const xDiff = Math.abs(rx - x);
+  const yDiff = Math.abs(ry - y);
+  const zDiff = Math.abs(rz - z);
+  if (xDiff > yDiff && xDiff > zDiff) rx = -ry - rz;
+  else if (yDiff > zDiff) ry = -rx - rz;
+  else rz = -rx - ry;
+  return { q: rx, r: rz };
+}
+
+function pixelToAxial(sx, sy) {
+  const x = (sx - ox) / R;
+  const y = (sy - oy) / R;
+  const q = (Math.sqrt(3) / 3) * x - y / 3;
+  const r = (2 / 3) * y;
+  return axialRound(q, r);
+}
+
+function pointLineDist(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  return Math.abs(dx * (y1 - py) - dy * (x1 - px)) / len;
+}
+
+function nearestFeature(x, y) {
+  let best = null;
+  let bestD = 0.3;
+  for (let i = 0; i < 6; i++) {
+    const v = vertexLocal(i);
+    const dv = Math.hypot(x - v.x, y - v.y);
+    if (dv < bestD) {
+      bestD = dv;
+      best = { kind: "vertex", index: i };
+    }
+    const m = midLocal(i);
+    const dm = Math.hypot(x - m.x, y - m.y);
+    if (dm < bestD) {
+      bestD = dm;
+      best = { kind: "mid", index: i };
+    }
+  }
+  const dc = Math.hypot(x, y);
+  if (dc < 0.24 && (best === null || dc < bestD)) best = { kind: "center" };
+  return best;
+}
+
+function featureAxis(feat) {
+  if (!feat) return null;
+  if (feat.kind === "vertex") return { index: feat.index % 3, type: "vertex" };
+  if (feat.kind === "mid") return { index: 3 + (feat.index % 3), type: "mid" };
+  return null;
+}
+
+function classify(x1, y1, x2, y2) {
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  if (len < 0.28) return { ok: false, reason: "short" };
+
+  const f1 = nearestFeature(x1, y1);
+  const f2 = nearestFeature(x2, y2);
+
+  if (f1 && f2 && f1.kind === "vertex" && f2.kind === "vertex") {
+    const diff = Math.min((f1.index - f2.index + 6) % 6, (f2.index - f1.index + 6) % 6);
+    if (diff === 1) return { ok: false, reason: "edge" };
+    if (diff === 2) return { ok: false, reason: "diagonal" };
+    if (diff === 3) return { ok: true, axisIndex: f1.index % 3, type: "vertex" };
+  }
+
+  if (f1 && f2 && f1.kind === "mid" && f2.kind === "mid") {
+    const diff = Math.min((f1.index - f2.index + 6) % 6, (f2.index - f1.index + 6) % 6);
+    if (diff === 3) return { ok: true, axisIndex: 3 + (f1.index % 3), type: "mid" };
+  }
+
+  if (f1 && f2 && ((f1.kind === "center" && f2.kind !== "center") || (f2.kind === "center" && f1.kind !== "center"))) {
+    const other = f1.kind === "center" ? f2 : f1;
+    const axis = featureAxis(other);
+    if (axis) return { ok: true, axisIndex: axis.index, type: axis.type };
+  }
+
+  const dist = pointLineDist(0, 0, x1, y1, x2, y2);
+  const ang = normHalf(Math.atan2(y2 - y1, x2 - x1));
+  let best = 0;
+  let bestD = Infinity;
+  for (let i = 0; i < AXES.length; i++) {
+    const d = anglePeriodDist(ang, AXES[i].angle);
+    if (d < bestD) {
+      bestD = d;
+      best = i;
+    }
+  }
+  const angleOk = bestD < (8 * Math.PI) / 180;
+  const centerOk = dist < 0.18;
+  if (centerOk && angleOk) return { ok: true, axisIndex: best, type: AXES[best].type };
+  if (!centerOk && angleOk) return { ok: false, reason: "center" };
+  if (centerOk && !angleOk) return { ok: false, reason: "angle" };
+  return { ok: false, reason: "both" };
+}
+
+function messageFor(result) {
+  if (result.ok && result.type === "vertex") return "对了。这是一条对称轴，它连接相对的两个顶点。";
+  if (result.ok && result.type === "mid") return "对了。这是一条对称轴，它穿过相对两条边的中点。";
+  if (result.reason === "edge") return "你连的是一条边。对称轴要穿过里面，连到对面的顶点。";
+  if (result.reason === "diagonal") return "这是较短的对角线。沿着它对折，两边不能重合。";
+  if (result.reason === "center") return "方向接近了，但对称轴一定要经过正中心。";
+  if (result.reason === "angle") return "线经过了中心，角度还没对准。试试顶点对顶点，或中点对中点。";
+  return "还不是对称轴。连接 A 和 D，或连接两条对边的中点。";
+}
+
+function foundSet() {
+  const set = new Set();
+  for (const stroke of strokes) {
+    if (stroke.ok && stroke.axisIndex >= 0) set.add(stroke.axisIndex);
+  }
+  return set;
+}
+
+function frontierCells() {
+  const list = [];
+  const seen = new Set();
+  for (const cell of cells.values()) {
+    for (const [dq, dr] of DIRS) {
+      const nq = cell.q + dq;
+      const nr = cell.r + dr;
+      const k = keyOf(nq, nr);
+      if (cells.has(k) || seen.has(k)) continue;
+      if (axialDist(nq, nr) > MAX_DIST) continue;
+      seen.add(k);
+      list.push({ q: nq, r: nr });
+    }
+  }
+  return list;
+}
+
+function isFrontier(q, r) {
+  if (cells.has(keyOf(q, r)) || axialDist(q, r) > MAX_DIST) return false;
+  for (const [dq, dr] of DIRS) {
+    if (cells.has(keyOf(q + dq, r + dr))) return true;
+  }
+  return false;
+}
+
+function syncRatio() {
+  if (!viewW || !viewH) return;
+  oxRatio = ox / viewW;
+  oyRatio = oy / viewH;
+}
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = canvas.getBoundingClientRect();
+  viewW = Math.max(1, rect.width);
+  viewH = Math.max(1, rect.height);
+  canvas.width = Math.round(viewW * dpr);
+  canvas.height = Math.round(viewH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ox = viewW * oxRatio;
+  oy = viewH * oyRatio;
+  draw();
+}
+
+function computeFit() {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const cell of cells.values()) {
+    const c = cellWorld(cell.q, cell.r);
+    minX = Math.min(minX, c.x - 1.05);
+    maxX = Math.max(maxX, c.x + 1.05);
+    minY = Math.min(minY, c.y - 1.08);
+    maxY = Math.max(maxY, c.y + 1.08);
+  }
+  const padX = 70;
+  const padY = 78;
+  const targetR = clamp(
+    Math.min((viewW - padX * 2) / (maxX - minX), (viewH - padY * 2) / (maxY - minY)),
+    36,
+    108
+  );
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  return {
+    targetR,
+    targetOx: viewW / 2 - cx * targetR,
+    targetOy: viewH / 2 - cy * targetR
+  };
+}
+
+function animateView(targetR, targetOx, targetOy) {
+  const id = ++viewAnim;
+  const startR = R;
+  const startOx = ox;
+  const startOy = oy;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    R = targetR;
+    ox = targetOx;
+    oy = targetOy;
+    syncRatio();
+    draw();
+    return;
+  }
+  const t0 = performance.now();
+  function step(now) {
+    if (id !== viewAnim) return;
+    const t = Math.min(1, (now - t0) / 280);
+    const e = 1 - Math.pow(1 - t, 3);
+    R = startR + (targetR - startR) * e;
+    ox = startOx + (targetOx - startOx) * e;
+    oy = startOy + (targetOy - startOy) * e;
+    syncRatio();
+    draw();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function fitAll() {
+  const fit = computeFit();
+  animateView(fit.targetR, fit.targetOx, fit.targetOy);
+}
+
+function setAnim() {
+  anim.angleTo = showAngles ? 1 : 0;
+  anim.axisTo = showAxes ? 1 : 0;
+  if (!animating) {
+    animating = true;
+    requestAnimationFrame(stepAnim);
+  }
+}
+
+function stepAnim() {
+  let done = true;
+  for (const key of ["angle", "axis"]) {
+    const target = anim[key + "To"];
+    anim[key] += (target - anim[key]) * 0.22;
+    if (Math.abs(target - anim[key]) < 0.012) anim[key] = target;
+    else done = false;
+  }
+  draw();
+  if (!done) requestAnimationFrame(stepAnim);
+  else animating = false;
+}
+
+function factText() {
+  const found = foundSet().size;
+  if (found === 6) {
+    return "6 条对称轴都找到了。3 条连接相对顶点，3 条穿过对边中点。沿着任意一条对折，两边都会重合。";
+  }
+  if (mode === "draw" && feedback) return feedback + (found ? " 已找到 " + found + " / 6 条。" : "");
+  if (cells.size > 1) {
+    return "正六边形可以密铺。每个内角 120°，三个角拼在同一个顶点上是 120° × 3 = 360°，正好铺满，没有缝隙。正多边形里，能单独密铺的还有正三角形和正方形。";
+  }
+  if (showAxes || mode === "draw" || found > 0) {
+    return "正六边形有 6 条对称轴：3 条连接相对顶点（A–D、B–E、C–F），3 条穿过相对边的中点。沿着对称轴对折，两边完全重合。";
+  }
+  if (showAngles) {
+    return "内角 = (6 − 2) × 180° ÷ 6 = 120°。六个内角相等，内角和是 720°。边上的短线表示边长相等。";
+  }
+  return "这是一个正六边形：六条边相等，六个角相等。先点击它，看看每个内角是多少度。";
+}
+
+function syncUI() {
+  const angleSpan = els.angle.querySelector("span");
+  const axisSpan = els.axis.querySelector("span");
+  angleSpan.textContent = showAngles ? "隐藏内角" : "显示内角";
+  axisSpan.textContent = showAxes ? "隐藏对称轴" : "显示对称轴";
+  els.angle.classList.toggle("on", showAngles);
+  els.axis.classList.toggle("on", showAxes);
+  els.angle.setAttribute("aria-pressed", String(showAngles));
+  els.axis.setAttribute("aria-pressed", String(showAxes));
+  els.draw.classList.toggle("active", mode === "draw");
+  els.copy.classList.toggle("active", mode === "copy");
+  els.remove.disabled = !selected || selected === "0,0";
+  const found = foundSet();
+  els.tags.innerHTML = "";
+  for (let i = 0; i < TAGS.length; i++) {
+    const tag = document.createElement("span");
+    tag.className = "tag" + (found.has(i) ? " got" : "");
+    tag.textContent = TAGS[i];
+    els.tags.appendChild(tag);
+  }
+  els.fact.textContent = factText();
+  els.fact.classList.toggle("good", found.size === 6);
+  els.status.textContent = statusText;
+  const noun = cells.size === 1 ? "1 个正六边形" : cells.size + " 个正六边形";
+  els.meta.textContent = noun + " · 对称轴 " + found.size + "/6";
+}
+
+function traceHexAt(cx, cy, radius) {
+  const rad = radius == null ? R : radius;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 3;
+    const x = cx + rad * Math.cos(a);
+    const y = cy + rad * Math.sin(a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+
+function fillRoundRect(x, y, w, h, r) {
+  const rad = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rad, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rad);
+  ctx.arcTo(x + w, y + h, x, y + h, rad);
+  ctx.arcTo(x, y + h, x, y, rad);
+  ctx.arcTo(x, y, x + w, y, rad);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function fillHex(cx, cy, alpha) {
+  const gradient = ctx.createLinearGradient(cx, cy - R, cx, cy + R);
+  gradient.addColorStop(0, "rgba(255, 231, 163, " + alpha + ")");
+  gradient.addColorStop(1, "rgba(240, 180, 41, " + alpha + ")");
+  traceHexAt(cx, cy, R + 0.75);
+  ctx.save();
+  ctx.shadowColor = "rgba(120, 72, 12, 0.16)";
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 6;
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  ctx.restore();
+}
+
+function strokeHex(cx, cy, color, width) {
+  traceHexAt(cx, cy);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+}
+
+function drawAngleAt(vx, vy, ax, ay, bx, by, label) {
+  const a1 = Math.atan2(ay - vy, ax - vx);
+  const a2 = Math.atan2(by - vy, bx - vx);
+  let sweep = a2 - a1;
+  while (sweep <= -Math.PI) sweep += Math.PI * 2;
+  while (sweep > Math.PI) sweep -= Math.PI * 2;
+  const radius = Math.max(12, R * 0.26) * (0.35 + 0.65 * anim.angle);
+  ctx.beginPath();
+  ctx.strokeStyle = "rgba(220, 38, 38, " + (0.35 + 0.65 * anim.angle) + ")";
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = "round";
+  ctx.arc(vx, vy, radius, a1, a1 + sweep, sweep < 0);
+  ctx.stroke();
+  if (!label || R < 58 || anim.angle < 0.7) return;
+  const mid = a1 + sweep / 2;
+  const lx = vx + Math.cos(mid) * (radius + 16);
+  const ly = vy + Math.sin(mid) * (radius + 16);
+  const text = "120°";
+  const size = Math.round(clamp(R * 0.15, 13, 16));
+  ctx.font = "700 " + size + "px " + FONT;
+  const tw = ctx.measureText(text).width;
+  ctx.fillStyle = "rgba(255, 250, 243, 0.94)";
+  fillRoundRect(lx - tw / 2 - 5, ly - size / 2 - 3, tw + 10, size + 6, 8);
+  ctx.fillStyle = "#9f1239";
+  ctx.fillText(text, lx, ly);
+}
+
+function drawIdealAxis(q, r, angle, color, alpha, width, dash) {
+  const len = 1 + 12 / R;
+  const x1 = Math.cos(angle) * len;
+  const y1 = Math.sin(angle) * len;
+  const a = localToScreen(q, r, x1, y1);
+  const b = localToScreen(q, r, -x1, -y1);
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.strokeStyle = color;
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = width;
+  ctx.setLineDash(dash);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+}
+
+function traceLength(points) {
+  let len = 0;
+  for (let i = 1; i < points.length; i++) {
+    len += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+  }
+  return len;
+}
+
+function drawTrace(q, r, points, color, width) {
+  if (!points || !points.length) return;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.setLineDash([]);
+  if (points.length === 1) {
+    const p = localToScreen(q, r, points[0].x, points[0].y);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Math.max(2.5, (width || 3) * 0.7), 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    return;
+  }
+  ctx.beginPath();
+  for (let i = 0; i < points.length; i++) {
+    const p = localToScreen(q, r, points[i].x, points[i].y);
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width || 2.8;
+  ctx.stroke();
+}
+
+function strokeIsOk(points) {
+  if (!points || points.length < 2) return false;
+  const start = points[0];
+  const end = points[points.length - 1];
+  return Boolean(classify(start.x, start.y, end.x, end.y).ok);
+}
+
+function drawInk(q, r, points, ok) {
+  if (ok) drawTrace(q, r, points, "rgba(5, 150, 105, 0.45)", 8);
+  drawTrace(q, r, points, "#3f3428", 2.8);
+}
+
+function nearestHex(sx, sy) {
+  const wx = (sx - ox) / R;
+  const wy = (sy - oy) / R;
+  let bestQ = 0;
+  let bestR = 0;
+  let bestD = Infinity;
+  for (const cell of cells.values()) {
+    const c = cellWorld(cell.q, cell.r);
+    const d = Math.hypot(wx - c.x, wy - c.y);
+    if (d < bestD) {
+      bestD = d;
+      bestQ = cell.q;
+      bestR = cell.r;
+    }
+  }
+  return { q: bestQ, r: bestR };
+}
+
+function handlePoints(q, r) {
+  const pts = [];
+  const center = centerScreen(q, r);
+  pts.push({ sx: center.x, sy: center.y, x: 0, y: 0, kind: "center" });
+  for (let i = 0; i < 6; i++) {
+    const v = vertexLocal(i);
+    const s = localToScreen(q, r, v.x, v.y);
+    pts.push({ sx: s.x, sy: s.y, x: v.x, y: v.y, kind: "vertex", index: i });
+    const m = midLocal(i);
+    const ms = localToScreen(q, r, m.x, m.y);
+    pts.push({ sx: ms.x, sy: ms.y, x: m.x, y: m.y, kind: "mid", index: i });
+  }
+  return pts;
+}
+
+function snapLocal(sx, sy, q, r) {
+  const pts = handlePoints(q, r);
+  let best = null;
+  let bestD = 22;
+  for (const pt of pts) {
+    const d = Math.hypot(pt.sx - sx, pt.sy - sy);
+    if (d < bestD) {
+      bestD = d;
+      best = pt;
+    }
+  }
+  if (best) return { x: best.x, y: best.y, sx: best.sx, sy: best.sy, kind: best.kind };
+  const local = screenToLocal(sx, sy, q, r);
+  return { x: local.x, y: local.y, sx, sy, kind: "free" };
+}
+
+function drawHandles(q, r, hot) {
+  for (const pt of handlePoints(q, r)) {
+    const near = hot && Math.hypot(hot.sx - pt.sx, hot.sy - pt.sy) < 1;
+    if (pt.kind === "center") {
+      ctx.beginPath();
+      ctx.arc(pt.sx, pt.sy, near ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#1f2937";
+      ctx.fill();
+      continue;
+    }
+    ctx.beginPath();
+    ctx.arc(pt.sx, pt.sy, pt.kind === "vertex" ? (near ? 7 : 5) : (near ? 6 : 4.5), 0, Math.PI * 2);
+    if (pt.kind === "vertex") {
+      ctx.fillStyle = near ? "#7c2d12" : "#8a4b08";
+      ctx.fill();
+    } else {
+      ctx.fillStyle = "#fffaf3";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = near ? "#7c2d12" : "#8a4b08";
+      ctx.stroke();
+    }
+  }
+}
+
+function drawLetters() {
+  if (R < 46) return;
+  const c = centerScreen(0, 0);
+  ctx.font = "700 " + Math.round(clamp(R * 0.18, 13, 18)) + "px " + FONT;
+  ctx.fillStyle = "#3f2a16";
+  ctx.strokeStyle = "rgba(255, 250, 243, 0.9)";
+  ctx.lineWidth = 4;
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 3;
+    const vx = c.x + Math.cos(a) * (R + 32);
+    const vy = c.y + Math.sin(a) * (R + 32);
+    ctx.strokeText(LETTERS[i], vx, vy);
+    ctx.fillText(LETTERS[i], vx, vy);
+  }
+  if (cells.size > 1 && R > 64) {
+    ctx.font = "600 12px " + FONT;
+    ctx.fillStyle = "#a16207";
+    ctx.strokeText("原图", c.x, c.y - R - 54);
+    ctx.fillText("原图", c.x, c.y - R - 54);
+  }
+}
+
+function drawTicks(q, r) {
+  ctx.beginPath();
+  ctx.strokeStyle = "#9a3412";
+  ctx.lineWidth = 1.6;
+  for (let i = 0; i < 6; i++) {
+    const a = localToScreen(q, r, vertexLocal(i).x, vertexLocal(i).y);
+    const b = localToScreen(q, r, vertexLocal((i + 1) % 6).x, vertexLocal((i + 1) % 6).y);
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const px = -dy / len;
+    const py = dx / len;
+    ctx.moveTo(mx - px * 6, my - py * 6);
+    ctx.lineTo(mx + px * 6, my + py * 6);
+  }
+  ctx.stroke();
+}
+
+function hexCenterForDraw(cell) {
+  if (gesture && gesture.type === "drag-hex" && keyOf(cell.q, cell.r) === gesture.key) {
+    if (gesture.valid) return centerScreen(gesture.tq, gesture.tr);
+    return { x: gesture.px, y: gesture.py };
+  }
+  return centerScreen(cell.q, cell.r);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, viewW, viewH);
+  ctx.fillStyle = "#fffaf3";
+  ctx.fillRect(0, 0, viewW, viewH);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineJoin = "round";
+
+  if (mode === "copy") {
+    ctx.setLineDash([4, 6]);
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = "rgba(180, 132, 58, 0.38)";
+    for (const slot of frontierCells()) {
+      const c = centerScreen(slot.q, slot.r);
+      traceHexAt(c.x, c.y);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    if (hover && !cells.has(keyOf(hover.q, hover.r)) && isFrontier(hover.q, hover.r) && !(gesture && gesture.type === "drag-hex")) {
+      const c = centerScreen(hover.q, hover.r);
+      traceHexAt(c.x, c.y);
+      ctx.fillStyle = "rgba(240, 180, 41, 0.2)";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#d39a2c";
+      ctx.stroke();
+      ctx.font = "600 22px " + FONT;
+      ctx.fillStyle = "#a16207";
+      ctx.fillText("+", c.x, c.y + 1);
+    }
+  }
+
+  const list = [...cells.values()].sort((a, b) => {
+    const as = keyOf(a.q, a.r) === selected ? 1 : 0;
+    const bs = keyOf(b.q, b.r) === selected ? 1 : 0;
+    return as - bs;
+  });
+
+  for (const cell of list) {
+    const c = hexCenterForDraw(cell);
+    const dragging = gesture && gesture.type === "drag-hex" && keyOf(cell.q, cell.r) === gesture.key;
+    const alpha = dragging && !gesture.valid ? 0.55 : 1;
+    fillHex(c.x, c.y, alpha);
+    const isCenter = cell.q === 0 && cell.r === 0;
+    const isSelected = keyOf(cell.q, cell.r) === selected;
+    let color = isCenter ? "#8a4b08" : "#b7791f";
+    let width = isCenter ? 3 : 2.2;
+    if (dragging && !gesture.valid) color = "#c2410c";
+    if (isSelected) {
+      color = "#1d4ed8";
+      width = 3;
+    }
+    strokeHex(c.x, c.y, color, width);
+  }
+
+  if (anim.axis > 0.02) {
+    for (let i = 0; i < AXES.length; i++) {
+      const color = AXES[i].type === "vertex" ? "rgba(37, 99, 235, 1)" : "rgba(8, 145, 178, 1)";
+      drawIdealAxis(0, 0, AXES[i].angle, color, anim.axis * 0.95, 2.1, [7, 6]);
+    }
+    const c = centerScreen(0, 0);
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(30, 64, 175, " + anim.axis + ")";
+    ctx.fill();
+  }
+
+  if (anim.angle > 0.02) {
+    const labelCells = cells.size <= 3;
+    for (const cell of cells.values()) {
+      let cq = cell.q;
+      let cr = cell.r;
+      if (gesture && gesture.type === "drag-hex" && keyOf(cell.q, cell.r) === gesture.key) {
+        if (!gesture.valid) continue;
+        cq = gesture.tq;
+        cr = gesture.tr;
+      }
+      const c = centerScreen(cq, cr);
+      for (let i = 0; i < 6; i++) {
+        const prev = vertexLocal((i + 5) % 6);
+        const next = vertexLocal((i + 1) % 6);
+        const here = vertexLocal(i);
+        const v = localToScreen(cq, cr, here.x, here.y);
+        const a = localToScreen(cq, cr, prev.x, prev.y);
+        const b = localToScreen(cq, cr, next.x, next.y);
+        const allowLabel = (labelCells || (cell.q === 0 && cell.r === 0)) && cells.size < 8;
+        drawAngleAt(v.x, v.y, a.x, a.y, b.x, b.y, allowLabel);
+      }
+      if (showAngles && anim.angle > 0.8 && R >= 58 && (cell.q === 0 && cell.r === 0 || cells.size <= 3)) {
+        drawTicks(cq, cr);
+      }
+    }
+  }
+
+  drawLetters();
+
+  if (showAngles && anim.angle > 0.85 && cells.size === 1 && R >= 72) {
+    const c = centerScreen(0, 0);
+    const y = c.y + R + 62;
+    if (y < viewH - 72) {
+      const text = "内角 = (6 − 2) × 180° ÷ 6 = 120°";
+      ctx.font = "600 18px " + FONT;
+      ctx.fillStyle = "#7f1d1d";
+      ctx.fillText(text, c.x, y);
+    }
+  }
+
+  if (mode === "draw") {
+    const targets = new Map();
+    targets.set("0,0", cells.get("0,0"));
+    if (hover && cells.has(keyOf(hover.q, hover.r))) targets.set(keyOf(hover.q, hover.r), cells.get(keyOf(hover.q, hover.r)));
+    if (gesture && gesture.type === "draw") targets.set(keyOf(gesture.q, gesture.r), { q: gesture.q, r: gesture.r });
+    if (anchor) targets.set(keyOf(anchor.q, anchor.r), { q: anchor.q, r: anchor.r });
+    let hot = null;
+    const pointer = gesture && gesture.type === "draw" ? { x: gesture.px, y: gesture.py } : hoverPointer;
+    for (const cell of targets.values()) {
+      if (pointer) {
+        const snapped = snapLocal(pointer.x, pointer.y, cell.q, cell.r);
+        if (snapped.kind !== "free") hot = snapped;
+      }
+      drawHandles(cell.q, cell.r, hot);
+    }
+  }
+
+  for (const stroke of strokes) {
+    let sq = stroke.q;
+    let sr = stroke.r;
+    if (gesture && gesture.type === "drag-hex" && keyOf(stroke.q, stroke.r) === gesture.key && gesture.valid) {
+      sq = gesture.tq;
+      sr = gesture.tr;
+    }
+    drawInk(sq, sr, stroke.points, stroke.ok);
+  }
+
+  if (gesture && gesture.type === "draw") {
+    drawInk(gesture.q, gesture.r, gesture.points, strokeIsOk(gesture.points));
+  } else if (anchor && hoverPointer) {
+    const end = screenToLocal(hoverPointer.x, hoverPointer.y, anchor.q, anchor.r);
+    const preview = [{ x: anchor.x, y: anchor.y }, end];
+    drawInk(anchor.q, anchor.r, preview, strokeIsOk(preview));
+  }
+}
+
+let hoverPointer = null;
+
+function eventPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function updateHover(pos) {
+  hoverPointer = pos;
+  const axial = pixelToAxial(pos.x, pos.y);
+  hover = axial;
+  if (gesture) return;
+  const key = keyOf(axial.q, axial.r);
+  const occupied = cells.has(key);
+  if (mode === "draw") canvas.style.cursor = "crosshair";
+  else if (mode === "copy") {
+    if (occupied && key !== "0,0") canvas.style.cursor = "grab";
+    else if (isFrontier(axial.q, axial.r)) canvas.style.cursor = "copy";
+    else canvas.style.cursor = "grab";
+  } else canvas.style.cursor = occupied ? "pointer" : "grab";
+}
+
+function onDown(e) {
+  if (e.button !== 0 && e.button !== 1) return;
+  viewAnim++;
+  const pos = eventPos(e);
+  const axial = pixelToAxial(pos.x, pos.y);
+  const key = keyOf(axial.q, axial.r);
+  const occupied = cells.has(key);
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+
+  if (e.button === 1) {
+    gesture = { type: "pan", lastX: pos.x, lastY: pos.y };
+    canvas.style.cursor = "grabbing";
+    return;
+  }
+
+  if (mode === "draw") {
+    const hex = cells.has(key) ? axial : nearestHex(pos.x, pos.y);
+    const start = screenToLocal(pos.x, pos.y, hex.q, hex.r);
+    gesture = {
+      type: "draw",
+      q: hex.q,
+      r: hex.r,
+      points: [{ x: start.x, y: start.y }],
+      px: pos.x,
+      py: pos.y,
+      sx: pos.x,
+      sy: pos.y,
+      moved: false
+    };
+    anchor = null;
+    canvas.style.cursor = "crosshair";
+    draw();
+    return;
+  }
+
+  if (mode === "copy" && occupied && key !== "0,0") {
+    gesture = {
+      type: "pending-hex",
+      key,
+      q: axial.q,
+      r: axial.r,
+      sx: pos.x,
+      sy: pos.y,
+      lastX: pos.x,
+      lastY: pos.y,
+      px: pos.x,
+      py: pos.y,
+      moved: false,
+      valid: true,
+      tq: axial.q,
+      tr: axial.r
+    };
+    return;
+  }
+
+  if (mode === "copy" && !occupied && isFrontier(axial.q, axial.r)) {
+    gesture = { type: "pending-place", q: axial.q, r: axial.r, sx: pos.x, sy: pos.y, lastX: pos.x, lastY: pos.y, moved: false };
+    return;
+  }
+
+  gesture = {
+    type: "pending-click",
+    key: occupied ? key : null,
+    q: axial.q,
+    r: axial.r,
+    sx: pos.x,
+    sy: pos.y,
+    lastX: pos.x,
+    lastY: pos.y,
+    moved: false
+  };
+}
+
+function onMove(e) {
+  const pos = eventPos(e);
+  updateHover(pos);
+  if (!gesture) {
+    if (anchor) draw();
+    return;
+  }
+  const dist = Math.hypot(pos.x - gesture.sx, pos.y - gesture.sy);
+  if (dist > 6) gesture.moved = true;
+
+  if (gesture.type === "pending-hex" && gesture.moved) {
+    gesture.type = "drag-hex";
+    selected = gesture.key;
+    canvas.style.cursor = "grabbing";
+  }
+  if ((gesture.type === "pending-place" || gesture.type === "pending-click") && gesture.moved) {
+    gesture.type = "pan";
+    canvas.style.cursor = "grabbing";
+  }
+
+  if (gesture.type === "draw") {
+    gesture.px = pos.x;
+    gesture.py = pos.y;
+    const local = screenToLocal(pos.x, pos.y, gesture.q, gesture.r);
+    const last = gesture.points[gesture.points.length - 1];
+    if (Math.hypot(local.x - last.x, local.y - last.y) >= 0.012) {
+      gesture.points.push({ x: local.x, y: local.y });
+    }
+    draw();
+    return;
+  }
+
+  if (gesture.type === "drag-hex") {
+    gesture.px = pos.x;
+    gesture.py = pos.y;
+    const axial = pixelToAxial(pos.x, pos.y);
+    const k = keyOf(axial.q, axial.r);
+    gesture.tq = axial.q;
+    gesture.tr = axial.r;
+    gesture.valid = axialDist(axial.q, axial.r) <= MAX_DIST && (k === gesture.key || !cells.has(k));
+    draw();
+    return;
+  }
+
+  if (gesture.type === "pan") {
+    ox += pos.x - gesture.lastX;
+    oy += pos.y - gesture.lastY;
+    gesture.lastX = pos.x;
+    gesture.lastY = pos.y;
+    syncRatio();
+    draw();
+  }
+}
+
+function commitLine(q, r, points) {
+  const path = points.map((p) => ({ x: p.x, y: p.y }));
+  if (path.length < 2 || traceLength(path) < 0.04) {
+    statusText = "再画长一点。松开之后，这笔会留在图上。";
+    syncUI();
+    return;
+  }
+  const start = path[0];
+  const end = path[path.length - 1];
+  const result = classify(start.x, start.y, end.x, end.y);
+  strokes.push({
+    q, r,
+    points: path,
+    ok: Boolean(result.ok),
+    axisIndex: result.ok ? result.axisIndex : -1,
+    type: result.type || null
+  });
+  if (result.ok) feedback = messageFor(result) + " 你画的这笔已按原样留下。";
+  else if (result.reason === "short") feedback = "痕迹已留下。对称轴要穿过六边形，连到对面。";
+  else feedback = messageFor(result) + " 这笔已按原样保留，可以再画一条。";
+  const found = foundSet().size;
+  statusText = found === 6 ? "6 条对称轴都找到了。你画的线都还在。" : feedback;
+  syncUI();
+}
+
+function placeCell(q, r) {
+  if (cells.size >= MAX_CELLS) {
+    statusText = "已经铺得不少了。可以清空副本后再拼。";
+    syncUI();
+    return;
+  }
+  const k = keyOf(q, r);
+  if (cells.has(k) || !isFrontier(q, r)) return;
+  cells.set(k, { q, r });
+  selected = k;
+  statusText = "放好了一个副本。继续点虚线格，或按「密铺一层」。";
+  const c = centerScreen(q, r);
+  const off = c.x < 36 || c.y < 36 || c.x > viewW - 36 || c.y > viewH - 36;
+  if (off) fitAll();
+  syncUI();
+  draw();
+}
+
+function moveCell(fromKey, nq, nr) {
+  const cell = cells.get(fromKey);
+  if (!cell) return;
+  cells.delete(fromKey);
+  cell.q = nq;
+  cell.r = nr;
+  const next = keyOf(nq, nr);
+  cells.set(next, cell);
+  for (const stroke of strokes) {
+    if (keyOf(stroke.q, stroke.r) === fromKey) {
+      stroke.q = nq;
+      stroke.r = nr;
+    }
+  }
+  selected = next;
+}
+
+function addOneCopy() {
+  if (cells.size >= MAX_CELLS) {
+    statusText = "格子已经满了。先移除几个，或清空副本。";
+    syncUI();
+    return;
+  }
+  const queue = [[0, 0]];
+  const seen = new Set(["0,0"]);
+  while (queue.length) {
+    const [cq, cr] = queue.shift();
+    for (const [dq, dr] of DIRS) {
+      const nq = cq + dq;
+      const nr = cr + dr;
+      const k = keyOf(nq, nr);
+      if (seen.has(k) || axialDist(nq, nr) > MAX_DIST) continue;
+      seen.add(k);
+      if (!cells.has(k)) {
+        cells.set(k, { q: nq, r: nr });
+        selected = k;
+        mode = "copy";
+        statusText = "复制了一个正六边形。拖动它可以拼到旁边。";
+        if (!isOnScreen(nq, nr)) fitAll();
+        syncUI();
+        draw();
+        return;
+      }
+      queue.push([nq, nr]);
+    }
+  }
+  statusText = "周围的格子都满了。";
+  syncUI();
+}
+
+function isOnScreen(q, r) {
+  const c = centerScreen(q, r);
+  return c.x > 48 && c.y > 48 && c.x < viewW - 48 && c.y < viewH - 48;
+}
+
+function growLayer() {
+  const add = [];
+  const seen = new Set();
+  for (const cell of cells.values()) {
+    for (const [dq, dr] of DIRS) {
+      const nq = cell.q + dq;
+      const nr = cell.r + dr;
+      const k = keyOf(nq, nr);
+      if (cells.has(k) || seen.has(k) || axialDist(nq, nr) > MAX_DIST) continue;
+      seen.add(k);
+      add.push({ q: nq, r: nr, k });
+    }
+  }
+  if (!add.length) {
+    statusText = "这一圈已经铺满了。可以重置视图，或清空后重新设计图案。";
+    syncUI();
+    return;
+  }
+  const room = MAX_CELLS - cells.size;
+  for (const item of add.slice(0, room)) cells.set(item.k, { q: item.q, r: item.r });
+  mode = "copy";
+  showAngles = true;
+  setAnim();
+  statusText = "铺开了一层，现在有 " + cells.size + " 个正六边形。看顶点处，三个 120° 合成 360°。";
+  fitAll();
+  syncUI();
+}
+
+function removeSelected() {
+  if (!selected || selected === "0,0") return;
+  cells.delete(selected);
+  strokes = strokes.filter((stroke) => keyOf(stroke.q, stroke.r) !== selected);
+  selected = null;
+  statusText = "已移除这个副本。";
+  syncUI();
+  draw();
+}
+
+function clearCopies() {
+  for (const key of [...cells.keys()]) {
+    if (key !== "0,0") cells.delete(key);
+  }
+  strokes = strokes.filter((stroke) => stroke.q === 0 && stroke.r === 0);
+  selected = null;
+  statusText = "只留下原来的正六边形。";
+  fitAll();
+  syncUI();
+}
+
+function clearLines() {
+  strokes = [];
+  feedback = "";
+  anchor = null;
+  statusText = "画过的线已清除，可以再试一次。";
+  syncUI();
+  draw();
+}
+
+function resetAll() {
+  cells.clear();
+  cells.set("0,0", { q: 0, r: 0 });
+  strokes = [];
+  selected = null;
+  anchor = null;
+  gesture = null;
+  feedback = "";
+  showAngles = false;
+  showAxes = false;
+  mode = "explore";
+  statusText = "点击中间的六边形，查看每个内角的度数。";
+  setAnim();
+  fitAll();
+  syncUI();
+}
+
+function setMode(next) {
+  mode = mode === next ? "explore" : next;
+  anchor = null;
+  if (mode === "draw") statusText = "按住拖动即可画，从边上起笔也可以。松开后笔迹会留下。";
+  if (mode === "copy") statusText = "点击虚线格放下副本，拖动已有的副本可以改位置。";
+  if (mode === "explore") statusText = "点击六边形可显示或隐藏内角。";
+  syncUI();
+  draw();
+}
+
+function onUp(e) {
+  if (!gesture) return;
+  const current = gesture;
+  gesture = null;
+
+  if (current.type === "draw") {
+    if (current.moved) commitLine(current.q, current.r, current.points);
+    else {
+      const pt = current.points[0];
+      if (!anchor) {
+        anchor = { x: pt.x, y: pt.y, q: current.q, r: current.r };
+        statusText = "已选中起点。再点一个点，两点之间的线会留下来。";
+        syncUI();
+      } else if (anchor.q === current.q && anchor.r === current.r) {
+        commitLine(current.q, current.r, [anchor, pt]);
+        anchor = null;
+      } else {
+        anchor = { x: pt.x, y: pt.y, q: current.q, r: current.r };
+        statusText = "换了一个六边形，请再点下一个点。";
+        syncUI();
+      }
+    }
+    draw();
+    return;
+  }
+
+  if (current.type === "drag-hex") {
+    if (current.valid && keyOf(current.tq, current.tr) !== current.key) {
+      moveCell(current.key, current.tq, current.tr);
+      statusText = "拼好了。相邻的边重合在一起，就是密铺的一部分。";
+    } else if (!current.valid) statusText = "这个位置放不下，已回到原处。";
+    else selected = current.key;
+    syncUI();
+    draw();
+    return;
+  }
+
+  if (current.type === "pending-hex") {
+    selected = current.key;
+    statusText = "选中了一个副本。可以拖动它，或按「移除选中」。";
+    syncUI();
+    draw();
+    return;
+  }
+
+  if (current.type === "pending-place") {
+    placeCell(current.q, current.r);
+    return;
+  }
+
+  if (current.type === "pending-click" && current.key && mode === "explore") {
+    showAngles = !showAngles;
+    setAnim();
+    statusText = showAngles
+      ? "每个内角都是 120°。内角和是 720°。接下来可以看对称轴。"
+      : "内角已隐藏。再点击六边形可以显示。";
+    syncUI();
+  } else if (current.type === "pending-click" && current.key === "0,0" && mode === "copy") {
+    selected = "0,0";
+    statusText = "这是原来的正六边形，固定在中心。拖动旁边的副本来拼接。";
+    syncUI();
+    draw();
+  }
+}
+
+function zoomAt(factor, sx, sy) {
+  viewAnim++;
+  const next = clamp(R * factor, 34, 120);
+  const k = next / R;
+  ox = sx - (sx - ox) * k;
+  oy = sy - (sy - oy) * k;
+  R = next;
+  syncRatio();
+  draw();
+}
+
+els.angle.addEventListener("click", () => {
+  showAngles = !showAngles;
+  setAnim();
+  statusText = showAngles
+    ? "每个内角都是 120°。六个内角加起来是 720°。"
+    : "内角已隐藏。";
+  syncUI();
+});
+
+els.axis.addEventListener("click", () => {
+  showAxes = !showAxes;
+  setAnim();
+  statusText = showAxes
+    ? "蓝色虚线过相对顶点，青色虚线过对边中点。也可以自己画一遍。"
+    : "参考对称轴已隐藏。你画出的线还在。";
+  syncUI();
+});
+
+els.draw.addEventListener("click", () => setMode("draw"));
+els.copy.addEventListener("click", () => setMode("copy"));
+els.add.addEventListener("click", addOneCopy);
+els.grow.addEventListener("click", growLayer);
+els.remove.addEventListener("click", removeSelected);
+els.clearCopies.addEventListener("click", clearCopies);
+els.clearLines.addEventListener("click", clearLines);
+els.reset.addEventListener("click", resetAll);
+els.reframe.addEventListener("click", fitAll);
+
+canvas.addEventListener("pointerdown", onDown);
+canvas.addEventListener("pointermove", onMove);
+canvas.addEventListener("pointerup", onUp);
+canvas.addEventListener("pointercancel", onUp);
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const pos = eventPos(e);
+  zoomAt(e.deltaY > 0 ? 0.94 : 1.06, pos.x, pos.y);
+}, { passive: false });
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "1") els.angle.click();
+  if (e.key === "2") els.axis.click();
+  if (e.key === "3") setMode("draw");
+  if (e.key === "4") setMode("copy");
+  if (e.key === "Escape") {
+    anchor = null;
+    mode = "explore";
+    statusText = "已回到观看。点击六边形可显示内角。";
+    syncUI();
+    draw();
+  }
+  if (e.key === "Delete" || e.key === "Backspace") {
+    e.preventDefault();
+    removeSelected();
+  }
+  if (e.key === "+" || e.key === "=") zoomAt(1.08, viewW / 2, viewH / 2);
+  if (e.key === "-" || e.key === "_") zoomAt(0.92, viewW / 2, viewH / 2);
+  const step = 28;
+  if (e.key === "ArrowLeft") { ox += step; syncRatio(); draw(); }
+  if (e.key === "ArrowRight") { ox -= step; syncRatio(); draw(); }
+  if (e.key === "ArrowUp") { oy += step; syncRatio(); draw(); }
+  if (e.key === "ArrowDown") { oy -= step; syncRatio(); draw(); }
+});
+
+window.addEventListener("resize", resize);
+
+syncUI();
+resize();
+requestAnimationFrame(fitAll);
+</script>
+</body>
+</html>
